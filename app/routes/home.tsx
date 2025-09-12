@@ -1,68 +1,63 @@
-import { useCallback, useEffect, useState } from "react"
-import Product from "./products"
-import CustomButton1 from "~/components/CustomButton"
-import { CustomInput } from "~/components/CustomInput"
+import { useReducer } from "react"
+import { cartReducer, type PruductType } from "./reducer";
+import CustomButton1 from "~/components/CustomButton";
+const produts: PruductType[] = [
+  { id: 1, name: "Product 1", price: 100 },
+  { id: 2, name: "Product 2", price: 200 },
+  { id: 3, name: "Product 3", price: 300 },
+];
 
 export default function Home() {
-  const [temp, setTemp] = useState<any>()
-  const image = "https://cdpcdn.dx1app.com/products/USA/YA/2025/MC/SUPERSPORT/YZF-R3/50/MATTE_STEALTH_BLACK/2000000003.jpg"
-  const [products, setProducts] = useState([
-    { name: 'yamaha R3', price: 1, id: 1, stock: "existing" },
-    { name: 'yamaha R3', price: 2, id: 2, stock: "existing" },
-    { name: 'yamaha R3', price: 3, id: 3, stock: "existing" },
-    { name: 'yamaha R3', price: 4, id: 4, stock: "existing" },
-    { name: 'yamaha R3', price: 5, id: 5, stock: "existing" },
-    { name: 'yamaha R3', price: 6, id: 6, stock: "existing" },
-    { name: 'yamaha R3', price: 7, id: 7, stock: "NonExisting" },
-    { name: 'yamaha R3', price: 8, id: 8, stock: "NonExisting" },
-    { name: 'yamaha R3', price: 9, id: 9, stock: "NonExisting" },
-    { name: 'yamaha R3', price: 10, id: 10, stock: "NonExisting" },
-    { name: 'yamaha R3', price: 11, id: 11, stock: "NonExisting" },
-    { name: 'yamaha R3', price: 12, id: 12, stock: "NonExisting" },
-  ]);
-  const handleClick = useCallback((name: string, price: number) => {
-    console.log(`${name} be gheymat ${price} add to cart shod`)
-  }, [])
-  const allClick = () => {
-    setProducts(temp)
-  }
-  const existingClick = () => {
-    setProducts(temp.filter((item: any) => {
-      return item.stock === "existing"
-    }))
-  }
-  const NonExistingclick = () => {
-    setProducts(temp.filter((item: any) => {
-      return item.stock === "NonExisting"
-    }))
-  }
-  const handleChange = (value: React.ChangeEvent<HTMLInputElement>) => {
+  const [state, dispatch] = useReducer(cartReducer, { items: [] });
 
-    if (value) {
-      setProducts(
-        temp.filter((item: any) => { return item.price <= value.target.value })
-      )
-    }
-  };
-  useEffect(() => {
-    setTemp(products)
-  }, [])
+  const produts: PruductType[] = [
+    { id: 1, name: "Product 1", price: 100 },
+    { id: 2, name: "Product 2", price: 200 },
+    { id: 3, name: "Product 3", price: 300 },
+  ];
 
   return (
-    <div className="p-5 ">
+    <div className="p-10">
+      <h1>Products </h1>
+      <div className="grid grid-cols-3">
+        {produts.map((product) => (
+          <div key={product.id}>
+            <h2>{product.name}</h2>
+            <p>{product.price}</p>
+            <button
+              className="bg-gray-200 rounded-md p-3"
+              onClick={() => dispatch({ type: "add", payload: product })}
+            >
+              add product
+            </button>
 
-      <CustomInput placeHolder={"Filter Gheymat Cala"} title={"Filter"} onChange={handleChange} />
-      <CustomButton1 title="all" variant="secondary" onClick={allClick} />
-      <CustomButton1 title="exist" variant="secondary" onClick={existingClick} />
-      <CustomButton1 title="non-exist" variant="secondary" onClick={NonExistingclick} />
-      <div className="grid grid-cols-5  ">
-        {products
-          .map((item, index) => {
-            return (
-              <div key={index}>
-                <Product image={image} name={item.name} price={item.price} stock={item.stock} onclick={handleClick} />
-              </div>)
-          })}
+          </div>
+        ))}
       </div>
-    </div>)
+      <div className="flex items-center gap-4">
+        <h1 className="my-6 font-black text-2xl">Cart</h1>
+        <CustomButton1
+          title="clear"
+          onClick={() => dispatch({ type: "clear" })}
+        />
+      </div>
+      {state.items.length === 0 && <h2>Cart is empty</h2>}
+      {state.items.map((item) => {
+        return (
+          <div key={item.id}>
+            <h2>{item.name}</h2>
+            <p>{item.price * item.quantity}</p>
+            <p>qyantity:{item.quantity}</p>
+            <button
+              className="bg-gray-200 rounded-md p-3"
+              onClick={() => dispatch({ type: "remove", payload: item.id })}
+            >
+              remove product
+            </button>
+           <CustomButton1 title="-1" variant="secondary" onClick={()=>dispatch({type:"-1",payload:item})}/>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
