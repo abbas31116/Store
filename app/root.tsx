@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { AccProvider } from "./routes/providers/AccountProviders";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -25,6 +26,7 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const query = new QueryClient();
   return (
     <html lang="en">
       <head>
@@ -33,13 +35,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
-        <AccProvider>
-        {children}
-        </AccProvider>
-        <ScrollRestoration />
-        <Scripts />
-      </body>
+      <QueryClientProvider client={query}>
+        <body>
+          <AccProvider>{children}</AccProvider>
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </QueryClientProvider>
     </html>
   );
 }
