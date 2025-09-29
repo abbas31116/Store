@@ -46,6 +46,10 @@ const deletePost = async (id: number) => {
   );
   return res.data;
 };
+const updatePost=async(data:IPost,id:number)=>{
+  const res= await axios.put(`https://jsonplaceholder.typicode.com/posts/${id}`,data);
+  return res.data;
+}
 
 export default function Home() {
   const { mutate, isPending } = useMutation({
@@ -56,6 +60,11 @@ export default function Home() {
     mutationFn: deletePost,
     mutationKey: ["DELETE POST"],
   });
+  const {mutate:mutateUpdate,isPending:updatePending}=useMutation({
+  mutationFn:updatePost,
+  mutationKey:
+  
+  })
   const {
     data: Comment,
     error: errComment,
@@ -86,6 +95,7 @@ export default function Home() {
           });
         }}
       />
+      <CustomButton1 title="update"/>
       {data?.map((item, index) => (
         <div key={index} className="flex items-center gap-2">
           <CustomButton1
