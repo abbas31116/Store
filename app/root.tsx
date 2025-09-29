@@ -11,6 +11,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { AccProvider } from "./routes/providers/AccountProviders";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -36,6 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <QueryClientProvider client={query}>
+        <ReactQueryDevtools initialIsOpen={false} />
         <body>
           <AccProvider>{children}</AccProvider>
           <ScrollRestoration />

@@ -1,8 +1,8 @@
-
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import CustomButton1 from "~/components/CustomButton";
 
-interface IPost {
+export interface IPost {
   title: string;
   id: number;
   body: string;
@@ -16,50 +16,92 @@ const fetchPost = async (): Promise<IPost[]> => {
   }
   return res.json();
 };
+
+const createPost = async (newPost: IPost) => {
+  const res = await axios.post(
+    "https://jsonplaceholder.typicode.com/posts",
+    newPost
+  );
+  return res.data;
+};
+
 interface IComment {
-  postId: number,
-  id: number,
-  name: string,
-  email: string,
-  body: string,
+  postId: number;
+  id: number;
+  name: string;
+  email: string;
+  body: string;
 }
 const comment = async (): Promise<IComment[]> => {
-  const res = await axios.get("https://jsonplaceholder.typicode.com/comments")
+  const res = await axios.get("https://jsonplaceholder.typicode.com/comments");
   if (!res) {
-    throw new Error("network")
+    throw new Error("network");
   }
-  return res.data
-}
+  return res.data;
+};
+
+const deletePost = async (id: number) => {
+  const res = await axios.delete(
+    `https://jsonplaceholder.typicode.com/posts/${id}`
+  );
+  return res.data;
+};
+
 export default function Home() {
-  const { data: Comment, error: errComment, isError: isErrComment, isLoading: isLoadingComment } = useQuery({
+  const { mutate, isPending } = useMutation({
+    mutationFn: createPost,
+    mutationKey: ["CREAET_POST"],
+  });
+  const { mutate: deleteMutate, isPending: deletePending } = useMutation({
+    mutationFn: deletePost,
+    mutationKey: ["DELETE POST"],
+  });
+  const {
+    data: Comment,
+    error: errComment,
+    isError: isErrComment,
+    isLoading: isLoadingComment,
+  } = useQuery({
     queryKey: ["COMMENTS"],
     queryFn: comment,
   });
-  return isLoadingComment?(
+  const { data } = useQuery({
+    queryFn: fetchPost,
+    queryKey: ["POST"],
+  });
+  return isLoadingComment ? (
     <div>loading data...</div>
-  ):isErrComment?(
+  ) : isErrComment ? (
     <div>{errComment.message}</div>
-  )
-  :(<div>
-    {Comment?.map((item,index)=>(
-      <p key={index}>{item.id}</p>
-    ))}
-  </div>)
-  // const { isLoading, isError, data, error } = useQuery({
-  //   queryKey: ["POST"],
-  //   queryFn: fetchPost,
-  //   staleTime: 1000 * 60,
-  //   gcTime: 1000 * 60 * 5,
-  // });
-  // return isLoading ? (
-  //   <div>loading</div>
-  // ) : isError ? (
-  //   <div>{error.message}</div>
-  // ) : (
-  //   <div>
-  //     {data?.map((item, index) => (
-  //       <p key={index}>{item.title}</p>
-  //     ))}
-  //   </div>
-  // );
+  ) : (
+    <div>
+      <CustomButton1
+        title={isPending ? "loading " : "اضافه کردن"}
+        onClick={() => {
+          mutate({
+            body: "body",
+            id: 100000,
+            title: "title",
+            userid: 84912384,
+          });
+        }}
+      />
+      {data?.map((item, index) => (
+        <div key={index} className="flex items-center gap-2">
+          <CustomButton1
+            title="delete"
+            onClick={() => {
+              deleteMutate(item.id, {
+                onSuccess(data, variables, onMutateResult, context) {
+                  alert(`item with id:${item.id} deleted`);
+                },
+                onError(error, variables, onMutateResult, context) {},
+              });
+            }}
+          />
+          <p>{item.id}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
