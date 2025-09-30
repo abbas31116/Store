@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import CustomData from "~/components/componentdata";
 import CustomButton1 from "~/components/CustomButton";
 
 export interface IPost {
@@ -46,10 +47,15 @@ const deletePost = async (id: number) => {
   );
   return res.data;
 };
-const updatePost=async(data:IPost,id:number)=>{
-  const res= await axios.put(`https://jsonplaceholder.typicode.com/posts/${id}`,data);
+const updatePost = async (data: IPost) => {
+  const res = await axios.put(`https://jsonplaceholder.typicode.com/posts/${data.id}`, data);
   return res.data;
 }
+const updateData = async (data: IPost) => {
+  const res = await axios.patch(`https://jsonplaceholder.typicode.com/posts/${data.id}`, data.title)
+  return res.data;
+}
+
 
 export default function Home() {
   const { mutate, isPending } = useMutation({
@@ -60,10 +66,13 @@ export default function Home() {
     mutationFn: deletePost,
     mutationKey: ["DELETE POST"],
   });
-  const {mutate:mutateUpdate,isPending:updatePending}=useMutation({
-  mutationFn:updatePost,
-  mutationKey:
-  
+  const { mutate: mutateUpdate, isPending: updatePending } = useMutation({
+    mutationFn: updatePost,
+    mutationKey: ["UPDATE POST"]
+  })
+  const { mutate: mutateUpInput, isPending: upPending } = useMutation({
+    mutationFn: updateData,
+    mutationKey: ["UP INPUT"]
   })
   const {
     data: Comment,
@@ -95,23 +104,27 @@ export default function Home() {
           });
         }}
       />
-      <CustomButton1 title="update"/>
-      {data?.map((item, index) => (
-        <div key={index} className="flex items-center gap-2">
-          <CustomButton1
-            title="delete"
-            onClick={() => {
-              deleteMutate(item.id, {
-                onSuccess(data, variables, onMutateResult, context) {
-                  alert(`item with id:${item.id} deleted`);
-                },
-                onError(error, variables, onMutateResult, context) {},
-              });
-            }}
-          />
-          <p>{item.id}</p>
-        </div>
-      ))}
+      <CustomButton1 title="update" onClick={() => {
+        mutateUpdate({
+          body: "avvas",
+          id: 1,
+          title: "title2",
+          userid: 1234567
+        }, {
+          onSuccess(data, variables, onMutateResult, context) {
+            alert(`item update with id:${data}`)
+          },
+        })
+      }} />
+      {data?.map((item, index) => {
+        return (<CustomData onclick1={() => {
+          deleteMutate(item.id, {
+            onSuccess(data, variables, onMutateResult, context) {
+              alert(`data delet with ${data}`);
+            },
+          });
+        } } id={item.id} index={index} place={item.title} />)
+      })}
     </div>
   );
 }
